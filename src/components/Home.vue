@@ -1,14 +1,15 @@
 <template>
   <div class="hello">
-    <h1 class="text-center">Firebase APIaaa project</h1>
+    <h1 class="text-center text-underline">Access Data From API (Firebase api) </h1>
+    <br/>
     <div class="container">
-      <div class="row" v-for='(post) in postData' :key='post.id'>
+      <div class="row mt-3" v-for='(post) in postData' :key='post.id'>
         <div class="col-3 text-right">
           <h5>{{ post.id }}</h5>
         </div>
         <div class="col-9">
-          <h6 class="pb-0 mb-0">{{ post.postDetails.title }} <span class="text-sm">( {{ post.postDetails.url }})</span></h6>
-          <small>by {{ post.postDetails.by }} </small> <small @click="gotoCommentSection(post.id, post.postDetails.kids.length)"> {{ post.postDetails.kids?post.postDetails.kids.length: 0 }} comments </small>
+          <h6 class="pb-0 mb-0" v-html="post.postDetails.title"> <span class="text-sm">( {{ post.postDetails.url }})</span></h6>
+          <small>by {{ post.postDetails.by }} </small> <small class="pl-3">by {{ moment(post.postDetails.time) }} </small> <small @click="gotoCommentSection(post.id, post.postDetails.kids?post.postDetails.kids.length:0, post.postDetails.title, post.postDetails.time)" class="pl-3" :class="{'custom-class': post.postDetails.kids}"> {{ post.postDetails.kids?post.postDetails.kids.length: 0 }} comments </small>
         </div>
       </div>
     </div>
@@ -17,6 +18,7 @@
 
 <script>
 import axios from 'axios'
+import moment from 'moment'
 import _ from 'lodash'
 export default {
   name: 'FireBaseAPI',
@@ -26,6 +28,10 @@ export default {
     }
   },
   methods:{
+    moment(value) {
+      return moment.unix(value).format('lll');
+    },
+
     getAllPost() {
       axios
       .get(
@@ -53,11 +59,11 @@ export default {
       });
     },
 
-    gotoCommentSection(id, commentLength) {
+    gotoCommentSection(id, commentLength, title, time) {
       if(commentLength > 0) {
         this.$router.replace({
           name: 'CommentDetails',
-          query: {id: id, commentLength: commentLength }
+          query: {id: id, commentLength: commentLength, title: title, time: time }
         })
       }
     }
@@ -71,5 +77,8 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-
+  .custom-class {
+    text-decoration: underline;
+    cursor: pointer;
+  }
 </style>

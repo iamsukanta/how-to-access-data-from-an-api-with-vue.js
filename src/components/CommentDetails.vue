@@ -1,21 +1,34 @@
 <template>
-  <div class="container">
-    <h4>{{ $route.query.commentLength }} comments</h4>
+  <div class="container pt-3">
+    <span><router-link to="/">Back to home</router-link></span>
+    <h4 v-html="$route.query.title"></h4>
+    <span>{{ moment($route.query.time) }}</span>
+    <h5>{{ $route.query.commentLength }} comments </h5>
     <hr/>
+    <br/>
     <div class="row mb-5" v-for="(baseComment) in commentsList" :key="baseComment.baseComment.id">
       <div class="col">
-        <p class="mb-0"><small style="text-decoration:underline">{{baseComment.baseComment.by}}</small></p>
-        <h4>{{ baseComment.baseComment.text }}</h4>
+        <p class="mb-0"><small style="text-decoration:underline">{{baseComment.baseComment.by}}</small> <small>{{ moment(baseComment.baseComment.time) }}</small></p>
+        <h6 v-html="baseComment.baseComment.text"></h6>
         <div v-for="(child) in childComment" :key="child.childrensData.id"> 
           <div class="ml-5" v-if="baseComment.baseComment.id == child.parent">
-            {{child.childrensData.text}}
+            <p class="mb-0"><small style="text-decoration:underline">{{child.childrensData.by}}</small> <small>{{ moment(child.childrensData.time) }}</small></p>
+            <p v-html="child.childrensData.text"></p>
             <hr/>
-             <div v-for="(childinner) in childInnerComment" :key="childinner.nestedchildrensData.id"> 
-                <div class="ml-5" v-if="child.childrensData.id == childinner.parent">
-                  {{childinner.nestedchildrensData.text}}
-                  <hr/>
+            <div v-for="(childinner) in childInnerComment" :key="childinner.nestedchildrensData.id"> 
+              <div class="ml-5" v-if="child.childrensData.id == childinner.parent">
+                <p class="mb-0"><small style="text-decoration:underline">{{childinner.nestedchildrensData.by}} <small>{{ moment(childinner.nestedchildrensData.time) }}</small></small></p>
+                <p v-html="childinner.nestedchildrensData.text"></p>
+                <hr/>
+                <div v-for="(childinnerinner) in childInnerInnerComment" :key="childinnerinner.nestedInnerChildrensData.id"> 
+                  <div class="ml-5" v-if="childinner.nestedchildrensData.id == childinnerinner.parent">
+                    <p class="mb-0"><small style="text-decoration:underline">{{childinnerinner.nestedInnerChildrensData.by}}</small> <small>{{ moment(childinnerinner.nestedInnerChildrensData.time) }}</small></p>
+                    <p v-html="childinnerinner.nestedInnerChildrensData.text"></p>
+                    <hr/>
+                  </div>
                 </div>
               </div>
+            </div>
           </div>
         </div>
       </div>
@@ -26,6 +39,7 @@
 
 <script>
 import axios from 'axios'
+import moment from 'moment'
 import _ from 'lodash'
 export default {
   data() {
@@ -33,6 +47,7 @@ export default {
       commentsList: [],
       childComment: [],
       childInnerComment: [],
+      childInnerInnerComment: [],
     }
   },
 
@@ -60,7 +75,6 @@ export default {
                   `https://hacker-news.firebaseio.com/v0/item/${child}.json`,
                 )
                 .then(childrens => {
-                  console.log(childrens.data, "inner child11");
                   this.childComment.push({ parent:childrens.data.parent,  childrensData: childrens.data});
 
                   if(childrens.data.kids.length) {
@@ -72,6 +86,22 @@ export default {
                       .then(nestedchildrens => {
                         console.log(nestedchildrens.data, "nested inner child11");
                         this.childInnerComment.push({ parent:nestedchildrens.data.parent,  nestedchildrensData: nestedchildrens.data});
+
+                        if(nestedchildrens.data.length) {
+                          _.forEach(nestedchildrens.data, (childinnerdata) =>{
+                            axios
+                            .get(
+                              `https://hacker-news.firebaseio.com/v0/item/${childinnerdata}.json`,
+                            )
+                            .then(nestedInnerChildrens => {
+                              console.log(nestedInnerChildrens.data, "nested inner inner child11");
+                              this.childInnerInnerComment.push({ parent:nestedInnerChildrens.data.parent,  nestedInnerChildrensData: nestedInnerChildrens.data});
+                            })
+                            .catch(err => {
+                              console.log(err);
+                            });
+                          })
+                        }
                       })
                       .catch(err => {
                         console.log(err);
@@ -92,15 +122,23 @@ export default {
         console.log(this.commentsList, "ddd");
         console.log(this.childComment, "childdata");
         console.log(this.childInnerComment, "childdataInner comment");
+        console.log(this.childInnerInnerComment, "childdataInnerInner comment");
       })
       .catch(err => {
         console.log(err);
       });
+    },
+
+    moment(value) {
+      moment.unix(value).format('lll');
     }
   },
 
   created() {
     this.getAllComments();
+  },
+
+  computed: {
   }
 }
 </script>
