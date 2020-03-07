@@ -1,2 +1,2 @@
-# How-to-access-data-from-API-with-Vue.js
-In this repository i will show how to access data from api using vue,js
+# How-to-access-data-from-an-api-withvue.js
+In this repository i will show how to access data from api using vuejs. I will use Firebase blogs post and nested comment api.
