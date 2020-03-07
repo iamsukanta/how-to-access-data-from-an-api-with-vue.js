@@ -59,6 +59,39 @@ export default {
       });
     },
 
+    // getAllPost() {
+    //   axios
+    //   .get(
+    //     `https://hacker-news.firebaseio.com/v0/topstories.json`,
+    //   )
+    //   .then(res => {
+    //     let requests = res.data.map(data => {
+    //       return new Promise((resolve) => {
+    //         axios
+    //         .get(
+    //           `https://hacker-news.firebaseio.com/v0/item/${data}.json`,
+    //         )
+    //         .then(res => {
+    //           resolve(res.data);
+    //         })
+    //         .catch(err => {
+    //           console.log(err);
+    //         });
+    //       })
+    //     })
+
+    //     Promise.all(requests).then((body) => { 
+    //       body.forEach(res => {
+    //       if (res)
+    //         this.postData.push({ id: res.id, postDetails: res })
+    //       })
+    //     }).catch(err => console.log(err))
+    //   })
+    //   .catch(err => {
+    //     console.log(err);
+    //   });
+    // },
+
     gotoCommentSection(id, commentLength, title, time) {
       if(commentLength > 0) {
         this.$router.replace({
